@@ -46,6 +46,7 @@ To clone and build, follow these steps:
 1. bundle
 1. ./configure --prefix=/path/to/install
 1. rake
+1. rake install
 
 The main difference is that bundle is used to install build requirements.
 
