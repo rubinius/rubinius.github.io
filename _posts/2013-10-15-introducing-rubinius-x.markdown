@@ -7,7 +7,7 @@ author: Brian Shirai
 Today, I'm announcing the [Rubinius X](http://x.rubini.us) project. Please read
 about the details at the website. Here's why I started the project.
 
-Ruby is a dying language. Business is over its dalliance with Ruby. No major
+Ruby is falling out of favor. Business is over its dalliance with Ruby. No major
 startup is lauding their use of Ruby and existing businesses are migrating away
 or simply writing new applications in a different language. The few exceptions
 prove the rule.
