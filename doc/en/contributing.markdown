@@ -1,8 +1,8 @@
 ---
 layout: doc_en
 title: Contributing
-previous: Getting Started - Troubleshooting
-previous_url: getting-started/troubleshooting
+previous: Getting Started - Differences With MRI
+previous_url: getting-started/differences-with-mri
 next: Communication
 next_url: contributing/communication
 ---

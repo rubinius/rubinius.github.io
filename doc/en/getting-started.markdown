@@ -17,3 +17,4 @@ channel on irc.freenode.net for help.
 1. [Building](/doc/en/getting-started/building/)
 1. [Running Rubinius](/doc/en/getting-started/running-rubinius/)
 1. [Troubleshooting](/doc/en/getting-started/troubleshooting/)
+1. [Unsupported Features](/doc/en/getting-started/unsupported-features)

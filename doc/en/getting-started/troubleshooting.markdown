@@ -3,8 +3,8 @@ layout: doc_en
 title: Troubleshooting
 previous: Running Rubinius
 previous_url: getting-started/running-rubinius
-next: Contributing
-next_url: contributing
+next: Differences With MRI
+next_url: getting-started/differences-with-mri
 ---
 
 The following are errors that you may encounter while building, installing, or
@@ -63,21 +63,21 @@ Rubinius. Before going further, consider running the following steps:
   Disable execinfo when configuring Rubinius:
 
     ./configure --without-execinfo
-    
+
 ### Fail to install rubinius with ruby-build
 
   Sometimes, you may have some trouble using
   [ruby-build](https://github.com/sstephenson/ruby-build) to install Rubinius.
-  
+
 #### Solution
 
   Please compile Rubinius yourself (ensuring that you have the required dependencies):
-  
+
     $ git clone https://github.com/rubinius/rubinius
     $ cd rubinius
     $ ./configure --prefix=/path/to/rubinius/location
     $ rake install
-    
+
   You don't have to specify the `--prefix` option. Just specify it if you want to put
   Rubinius into a specific directory. The best to do is to put Rubinius into a
   directory which is in your `PATH`.

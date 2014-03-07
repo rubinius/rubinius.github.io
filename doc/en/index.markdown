@@ -12,6 +12,7 @@ next_url: what-is-rubinius
     1. [Building](/doc/en/getting-started/building/)
     1. [Running Rubinius](/doc/en/getting-started/running-rubinius/)
     1. [Troubleshooting](/doc/en/getting-started/troubleshooting/)
+    1. [Differences With MRI](/doc/en/getting-started/differences-with-mri)
 1. [Contributing](/doc/en/contributing/)
     1. [Communication](/doc/en/contributing/communication/)
     1. [Style Guide](/doc/en/contributing/style-guide)
