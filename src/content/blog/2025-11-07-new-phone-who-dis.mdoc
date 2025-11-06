@@ -1,0 +1,544 @@
+---
+title: "New Phone, Who 'Dis?"
+description: "The next phase of Rubinius."
+author: Brian Shirai
+date: 2025-11-07
+---
+
+## A Trip down Memory Lane
+
+Almost 20 years ago, [Evan Phoenix](https://github.com/evanphx) created the
+Rubinius project. His idea at the time was pretty modest: what if we could
+bring 1980s Smalltalk technology to Ruby. It's undeniable that the music of the
+1980s is unmatched in history, but it's also true that the 80s and 90s saw some
+pretty amazing advances in programming language implementation that we're still
+mining today.
+
+Through a mostly random (as all things are) and fortuitious chain of events, I
+first heard of Rubinius shortly after Evan talked about it at the 2006 RubyConf
+in Denver, Colorado. I was doing Rails development at the time, and RSpec was
+just getting started. I loved using it.
+
+One day (Dec 6th, 2006), I popped into the #rubinius IRC channel and asked if
+the intention of Rubinius was to fork Ruby or to stay as compatible as
+possible? [Wilson Bilkovich](https://github.com/wilson) responded that there
+was no intention of forking Ruby.
+
+I was sold. I got the code (we were still using Subversion at the time) and a
+few days later, on Dec 14th 2006, my first commit landed. Not long after that,
+I created a tiny version of RSpec running that would function with the limited
+capabilities Rubinius had at the time, and the beginning of RubySpec was born.
+
+For another first-hand account of these early days, here's [a great
+post](https://headius.blogspot.com/2006/10/rite-rubinius-and-everything-seeking.html)
+about 2006 RubyConf by [Charles Oliver Nutter](https://github.com/headius) of
+[JRuby](https://github.com/jruby) fame.
+
+By 2009, Rubinius had quite a list of accomplishments:
+
+* A fast bytecode virtual machine written in C++;
+* The entire Ruby core library **written in Ruby**;
+* The bytecode compiler written in Ruby;
+* Fully native threading with no global interpreter lock;
+* A generation garbage collector based on the Immix algorithm published in 2008;
+* A JIT machine code compiler using the then-very-early LLVM project;
+* RubySpec; and
+* Yes, it ran Rails.
+
+That's quite a list of accomplishments from a rag-tag band of folks from all
+over the world.
+
+From 2008 until 2013, Engine Yard sponsored my open source work on Rubinius.
+Early on, Evan said to me one time, "It's our job to build the best Ruby
+implementation we can; it's Engine Yard's job to figure out how to monetize
+it."
+
+At the time, that made a ton of sense to me. I wasn't a business person. I
+didn't know sales and marketing. But I could make Rubinius as useful as we
+could. So, by 2013, Rubinius simultaneously supported no less than **four**
+distinct versions of Ruby.
+
+Unfortunately, that wasn't the best thing for Ruby or Rubinius, and so I took
+away some hard-learned lessons that I don't want to repeat. The most important
+of those is that you must really capitalize on you strongest points to deliver
+the most value as soon as possible, and build out from there. That could mean
+doing something that most people don't find useful, but a few people find
+incredibly useful.
+
+If I could go back, what I'd do instead is make Ruby 1.8.7 run incredibly fast
+because a bunch of companies still had applications on Ruby 1.8.7. Then,
+instead of chasing Ruby 1.9/2.0 initially, once those Ruby 1.8.7 apps were
+screaming fast with good garbage collection, native threading, and JIT support,
+I would have created automated tools to migrate to Ruby 1.9/2.0, where
+significant changes, like block argument processing, caused a lot of migration
+headaches.
+
+Coulda, woulda, shoulda, water under the bridge now. But it's helpful to take
+useful lessons from the past forward to do better.
+
+### It's Never Too Late for a Fresh Start
+
+As an incredible stroke of luck would have it, the fantastic folks at [Semper
+Victus](https://www.sempervictus.com) and particulary an early advocate for
+using Rubinius in Metasploit, RageLtMan(https://github.com/sempervictus) are
+sponsoring my work to get Rubinius up and kicking stronger than ever.
+
+What follows are some ideas, almost all of them from at least ten years ago,
+about how to do that, and how you can help.
+
+## Boldly into the Future
+
+It may feel like coding is dead, long live Vibe Coding, but I am here to assure
+you that good old-fashioned proper software engineering is alive and well and
+more important than ever.
+
+Yes, in fact, no exaggeration, more important than ever because the number of
+security threats and exploits, and the consequences of those as [software just
+keeps on eating the world](https://a16z.com/why-software-is-eating-the-world/)
+cannot be over-estimated. It's a wild, wild world out there.
+
+### The Compiler Inside-out
+
+There really aren't any differences between any general purpose languages. They
+ultimately run on the same CPU.
+
+Of course that sounds odd to most people. *Surely, Rust is faster than Ruby,
+who could argue with that?*
+
+Well, having implemented Ruby, I can. It's true that, out-of-the-box, Rust is
+going to be 5-10 times faster than Ruby. So is C/C++. And probably Go, too.
+
+But the **language** isn't faster, the **implementation** is faster. But the
+implementation isn't something you can just hand-wave away. It's a **ton** of
+work. So bang-for-the-buck, yeah, Rust is faster than Ruby.
+
+But what would have to be true for that *not to be the case?*.
+
+I have an idea, but it requires challenging a lot of stuf about how a
+programming language is implemented.
+
+Consistent with the Rubinius goal of implementing Ruby in Ruby, I wrote the
+current bytecode compiler in Ruby. And Evan wrote the JIT in C++ with LLVM. I
+never imagined writing a single compiler.
+
+Then about a year ago I was working on building an LLVM-based compiler for a
+custom ASIC for fully-homomorphic encryption (FHE), and I saw the WebAssembly
+backend in the LLVM source tree and it was an immediate forehead-slapping
+moment, "Doh! Why didn't I think of that?!"
+
+So one of the core pieces of the new Rubinius is an LLVM-based compiler
+top-to-bottom, front-to-back, inside-out, and all around.
+
+This is a really exciting thing to think about. I spent a few months writing a
+client/server set using gRPC in Go and I must say, it was excellent. I really
+envy how easy it is to create an executable in Go, and to cross compile by
+simply setting two env vars. That's the bar.
+
+So imagine running `rbc my_ruby.rb -o my_app` and it *Just Works*. That's the
+idea.
+
+#### Wait what... Python??
+
+But then when you think about it, why just Ruby? For us Rubyists (or recovering
+Rubyists), there's no denying Python gets an awful lot of attention, especially
+from data scientists and AI researchers.
+
+So one of the tests for this new compiler machinery is to put a Python frontend
+on it and see how far we get before the wheels fall off. And then, of course,
+we'll have to get those wheels back on.
+
+### Ruby in Rubinius
+
+Writing Ruby in Ruby has a lot of benefits. One is that a lot more of the Ruby
+community can contribute, and the code implementing core library classes is a
+pretty useful source of understanding.
+
+And when everything is in Ruby, the JIT compiler can really go to town without
+running into opaque walls of who-know-what-that-C-code-is-doing.
+
+At the same time, there are some drawbacks to writing it all in Ruby. One of
+those is that Ruby semantics are pretty hairy sometimes, and if you depend on
+dividing two Integers giving you another Integer but you suddenly get a Float
+(yeah, thanks `mathn`), things can get messy real quickly.
+
+Surprisingly enough, if you've been pretty enamored with how "beautiful and
+elegant" it is for "everything to be an Object" in Ruby, you might have missed
+some of the weird edges that do exist.
+
+A while ago I wrote a couple posts about two aspects of this:
+
+* [nil Is Not NULL, and Other Tales](https://medium.com/metalanguage/nil-is-not-null-and-other-tales-febf6730f216); and
+* [Objects are for interactions, functions are for data](https://medium.com/metalanguage/objects-are-for-interactions-functions-are-for-data-936e044cc729).
+
+I think there are a few useful ideas in those, but it does make it a bit harder
+to map out the next chapter of Rubinius because, let's face it, writing `\(a,b)
+{ a + b }` is just plain nicer than stabby proc.
+
+But if you remember a bit ago that I mentioned Python in Rubinius. Problem
+solved. There's no reason not to have three frontends to the compiler: a Ruby
+one, a Python one, and an *"experimental"* one that can be used alongside of or
+inside of or around or on top of the Ruby code. In fact, we have those lovely
+semantic comments from the glory days of encodings that can easily be used to
+[pick your poison](https://github.com/brixen/poison).
+
+### Literate Spec
+
+"But," you may be thinking, "how in the heck would you know that's working?"
+And that would be a very good question to ask. If you've used ChatGPT much, you
+could even think "that cuts right to the heart of what implementing a language
+is all about." Oh, ChatGPT...
+
+About ten years ago, I was pondering the state of RubySpec at the time and
+wondering how to make it more useful. It bothered me that the spec strings
+weren't really used for much, even though they were really helpful in
+understanding all the nuances in the Ruby core library methods.
+
+I started thinking about literate programming and realized that while code and
+documentation makes for a huge mess, [*specs* and documentation seemed like an
+incredible
+match](https://github.com/rubinius/literate-ruby/blob/3fddc1fff9ca7f3049bc7bed6fcdba3a6a963933/README.md).
+
+And it seems like an even more powerful concept as soon as there are multiple
+languages in the implementation. So that's the plan. Combine the documentation
+and the tests into one literate-spec and be able to execute the code using
+whatever tool is called for, but collecting all the results in one place with
+the source of the literate specs.
+
+### A Virtual Machine by any Other Name
+
+The saying is, "A rose by any other name would smell as sweet." But there is
+more to a virtual machine than the name. A well-constructed virtual machine is
+immensely useful.
+
+While we intend for the language machinery to be able to take human-level
+source code to machine code directly, a very useful intermediate representation
+is the virtual machine ISA (instruction set architecture). This is because
+source code is merely a description of computation. You need a computation
+resource to run it.
+
+When Rubinius started, the virtual machine component was a very basic stack
+machine inspired by the Smalltalk one. One of the things I realized after
+learning more about register versus stack machines was that there was no reason
+the virtual machine had to be one or the other.
+
+Another thing I realized, after reading a pair of papers about observability in
+the JVM is that *non-computing* instructions could be very useful. I extended
+the original Rubinius ISA with register instructions, PEG (parsing expression
+grammar) instructions, assertion instructions that could halt but not alter
+computation, and various diagnostic instructions that can stream out various
+metrics.
+
+For example, consider benchmarking an operation as illustrated in this
+pseudo-assembly language below:
+
+```
+  .label
+
+    start_time
+    call :some_method
+    sum_time
+```
+
+In the instruction sequence, the `start_time` instruction reserves space to
+store a 64-bit number representing the current value of the system
+high-resolution clock value.
+
+After the call to `:some_method`, the `sum_time` instruction, which also
+reserves space to store a cumulative number of "ticks" of the high-resolution
+clock appends the value of "current_time - start_time". At some later time, the
+`MachineCode` method con be queried to extract the value at the `sum_time`
+instruction offset. This way, there is extremely low overhead to recording the
+accumulated time.
+
+Another benefit of this approach is that now the whole compiler toolchain, from
+top-level syntax throough all intermediate representations and all the way to
+machine code can uniformly know and reason about this facility.
+
+If you saw the above and your concurrency spidey sense twiggled, you're right,
+those embedded memory locations could be a problem if multiple threads were
+executing that same method. But, there's no reason why each of those threads
+could not have their own instance of the `MachineCode` object for that method
+if it has an attribute that disallows concurrent execution. This is another
+  benefit of having well-defined and fully integrated tooling concepts.
+
+These concepts are being extended and improved in the new Rubinius virtual
+machine to provide more functionality for systems to understand and improve
+expression of computation at all levels of the language system.
+
+### Doing All the Things at Once
+
+One of the most important and valuable aspects of Rubinius since Evan started
+rewriting his second prototype (shotgun) in C++ was support for native threads
+with no global interpreter lock (GIL).
+
+As the world of systems continued to evolve, first with Node and then with
+other systems like Erlang/Elixir and Rust, the value of extremely lightweight
+concurrency and constructs like async/await have massively extended the power
+of software that uses these facilities.
+
+While threads are still a highly useful construct, there is a lot of value to
+other ways of implementing efficient use of the massive compute resources in
+modern CPUs.
+
+One feature we want to add to Rubinius in a uniform and coherent way is
+asynchrony. This needs to interoperate with all the other system features and
+be understood by the entire compiler toolchain.
+
+### Memory & Garbage
+
+Let's face it, no one really likes garbage. But it's a fact of any reasonably
+complex computation. If we never record anything in memory, we'd never be able
+to do anything interesting. Heaps are a necessity.
+
+But how we construct them is up to us. One idea I wrote about [more than five
+years
+ago](https://github.com/rubinius/rubinius/commit/a745a63c37209ea5097587a1a183c73c9a00473f)
+involves different types of heaps. Since those ideas still seem valuable to me,
+I'll just repost them here:
+
+Rubinius has two kinds of managed objects: object-oriented ones that can
+support inheriting from a superclass, and data objects that have no concept of
+object-orientation.
+
+Rubinius has three concepts for heaps, the space where managed objects live:
+
+1. The *open* heap is one where any object in the heap can contain a reference
+to any other object. Think normal Ruby land;
+1. The *closed* heap is one where an object in the heap can contain a reference
+to an object outside the closed heap, but no object outside can contain a
+reference to an object in the closed heap;
+1. The *isolated* heap is one where no object in the isolated heap can contain
+a reference to an object outside the heap, and no object outside can contain a
+reference to an object in the isolated heap.
+
+Threads that use isolated heaps can execute fully independent of any other
+thread and only must synchronize with the process during boot, fork, and halt.
+The garbage collector for isolated heaps is run in that thread.
+
+Rubinius currently uses a single mechanism for garbage collection, the [Immix
+mark-region
+collector](http://www.cs.williams.edu/~dbarowy/cs334s18/assets/immix-pldi-2008.pdf),
+but there has been more innovation in garbage collection since 2020. One
+interesting approach is [Perceus: Garbage Free Reference Counting with
+Reuse](https://www.microsoft.com/en-us/research/wp-content/uploads/2020/11/perceus-tr-v1.pdf).
+
+The Rubinius garbage collector currently runs on a single separate thread and
+must fully synchronize all threads that mutate managed memory (ie it stops the
+world). Given the new concepts of various heaps, this machinery could be
+improved significantly. At one point, Rubinius had a concurrent and parallel
+collector, but there were bugs and in the presence of full native threading and
+a JIT compiler, the source of nondeterminancy were too high so I reverted to a
+single STW collector. This offers an opportunity to rethink the garbage
+collection system from the ground up while implementing the new heaps.
+
+### CodeDB
+
+#### Dimensions of Meaning
+
+In same ways, a program is simple. You can think of it either as the source
+code, or whatever form is actually executed by the computation resource,
+bytecode for the virtual machine or machine code for the physical CPU.
+
+But there are also many dimensions of associated data that one could find
+interesting. For example:
+
+* Type profiles;
+* Test coverage data;
+* Profiling information;
+* Benchmarking information;
+* Various intermediate representations;
+* Various instances of JIT compilation;
+* And surely others.
+
+Realizing this is what motivated me to create the Rubinius CodeDB. It also
+serveed another purpose. By laying out the bytecode a certain way, it enabled
+me to mmap the file containing the bytecode-compiled Ruby core library and
+improve Rubinius startup time because at startup, all that code needs to be
+read in.
+
+To implement this, every executable context--script body, class/module body,
+method, block--has an associated SHA generated from digesting its instruction
+sequence.
+
+#### Content-addressable Code
+
+At the time, I knew about [IPFS (the Interplanetary File
+System)](https://ipfs.tech) and content-addressable web pages, but I didn't
+think about that for code. I had not yet heard about [the Unison programming
+language](https://www.unison-lang.org).
+
+In Unison, the name you give a function doesn't really matter. It's a
+human-readable label associated with the immutable attribute of exactly what
+that code does (is/does there's a bit of lambda-calculus esoterics there we
+won't get into).
+
+Unison is a very interesting programming language. You  should go check it out
+because there are a lot of cool ideas there to borrow.
+
+#### Rubygems & Bundler Sittin in a Tree
+
+One place I am extremely excited to deploy these concepts is with Rubygems.
+
+Imagine for a moment that publishing a package (rubygem) was just writing it to
+IPFS (or for that matter, your GitHub account) and associating the SHA for that
+content with a human-readable label, something like (fooboo-gem-v123,
+0x01234abcd). Imagine further that for a particular set of dependencies, the
+list of which packages to get was *also* just a file on IPFS associated with a
+SHA of your Gemfile.
+
+Bam, there's your content. No more running, re-running, and re-re-re-running
+the same resolver logic over and over. Imagine how many times Bundler has
+resolved the exact same out-of-the-box dependencies for a particular Rails
+release. Talk about wasted cycles...
+
+So to relate this back to the CodeDB, one thing we're going to do is make the
+CodeDB content-addressable, and then anything you want to put in it, including
+Rubygems, won't need a lot of extra ceremony and package formats and gem
+sources and all that jazz.
+
+There's a scenario where this gets really interesting. Consider running an
+agent or Actor in one of those isolated heaps by merely invoking it with the
+SHA of the content from the CodeDB to fetch and start running. Infrastructure
+just blends completely with the system.
+
+## Vivarium is the RubySpec of AI
+
+Up to now, everything that I've described is solidly within the Ruby (or
+Python) language ecosystem. But you may have heard something about the newest
+craze sweeping tech, the lalala elelemenems.
+
+It's probably a bubble of epic proportions heretofore unseen, but it's not
+exactly new. We've been pondering artificial intelligence for as long as we've
+had any remotely formal understanding of computation.
+
+So once all the low-hanging fruit available for the picking was picked by
+Rails, what else was there to do but pivot to the next new thing.
+
+As it turns out, having a powerful language platform looks like something that
+will be tremendously useful in the AI super space race. The core idea is that
+programming languages are a terrific means of interoperating between agents and
+between agents and tools. In fact, if we give agents the ability to manipulate
+the language machinery directly, we may be able to create a completely new
+paradigm for infrastructure and security in software.
+
+To see what that looks like and how it might work, head over to [Vivarium
+AI](https://vivarium-ai.com) and have a gander.
+
+But if you've been following along, one thing that helped us implement Rubinius
+as fast as we did was RubySpec. And one thing that might help us figure out
+this AI (lalala elelemenems) thing would be a way to compare results across a
+lot of ideas and ground some of this lalala land in something more tangible
+than GPU rainbows and unicorns (and pots of NVIDIA gold).
+
+Of course, it's not required that you go stick your head in lalala land. It
+works just as well to stick fingers in your ears and sing lalala.
+
+## How Can I Help?
+
+Why, thanks for asking! Over the years, many people have generously contribute
+a lot of their time to help build Rubinius.
+
+At lot has changed in the world since Evan created the project, but the utility
+of software has only grown. This is an opportunity to take all the lessons of
+the past 20 years and apply them to create a system that will continue to
+improve over the next 20 years.
+
+I've set up GitHub Projects at the Rubinius organization level to make it as
+easy as possible to coordinate on work in various areas of the project, and to
+give everyone as much visibility and opportunity as possible to bring your
+ideas to help make Rubinius better.
+
+### Projects
+
+A system as complex as Rubinius involves a lot of moving pieces. Making sense
+of these at a highe level can be difficult.
+
+But let me assure you, there is a place anyone can contribute, no matter what
+your background or interest is. Here's one potentially useful map of the
+terrain.
+
+We're using GitHub Projects at the organization level to help group work into
+subject areas according to these higher level concepts for a language platform.
+There are various views available, including boards and roadmaps, for
+understanding how work in one of these areas is progressing.
+
+These are the current projects:
+
+1. **[LLVM-based Compiler](https://github.com/orgs/rubinius/projects/2)**:
+Using WebAssembly LLVM backend as inspiration, create an fully integrated
+LLVM-based compiler toolchain that can emit code for the Rubinius ISA or a
+machine target, unifying the previous bytecode compiler and JIT machine code
+compiler.
+1. **[Build System & Packaging](https://github.com/orgs/rubinius/projects/7)**:
+Work related to removing Ruby and implementing build2 as the Rubinius build
+system and integrating Rubinius with popular package managers like Homebrew,
+Ubuntu, RHEL, and Arch.
+1. **[Concurrency &
+Performance](https://github.com/orgs/rubinius/projects/6)**: Work focused on
+improving multi-core concurrency and parallelism and optimizing performance.
+1. **[CodeDB & IPFS/Noria](https://github.com/orgs/rubinius/projects/5)**: Work
+focused on generalizing code artifacts from on-disk to IPFS or Noria caches.
+1. **[Parsers & PEGs](https://github.com/orgs/rubinius/projects/4)**: Work
+focused on completing the PEG (parsing expression grammar) segment of the
+Rubinius ISA (instruction set architecture) and implementing parser for other
+languages (eg Python) using these facilities.
+1. **[Heaps & Garbage
+Collection](https://github.com/orgs/rubinius/projects/3)**: Work focused on
+creating three distinct heaps in Rubinius: open, closed, isolated. Also
+bringing concepts from FBIP and Perceus garbage collection to Rubinius. Heaps
+support functionality like Actors.
+1. **[Update Ruby Support](https://github.com/orgs/rubinius/projects/8)**: Work
+related to updating the Ruby language version supported by the parser and the
+Ruby core and standard libraries to be able to run apps like Rails and
+Metasploit.
+1. **[Contributions & Social
+Media](https://github.com/orgs/rubinius/projects/1)**: Coordinate contributions
+under a new license and organizational structure (foundation) and improve the
+Rubinius social media presence.
+
+### Roadmap
+
+While having a good overview of various areas of the system is helpful,
+sometimes it's also important to know when a particular capability will be
+available, and what are the tasks necessary to achieve that.
+
+GitHub has repository-level milestones that are useful for this. Milestones are
+not (yet) well-integrated with organization-level projects, but issues that are
+part of a milestone can also be part of projects.
+
+These are the current milestones organized by GitHub repository:
+
+* **[rubinius/compiler-ng](https://github.com/rubinius/compiler-ng)**
+  * [1a: LLVM end-to-end compiler](https://github.com/rubinius/compiler-ng/milestone/1)
+  * [1b: Language interface to the compiler](https://github.com/rubinius/compiler-ng/milestone/2)
+  * [3a: Tier-1 JIT](https://github.com/rubinius/compiler-ng/milestone/3)
+  * [3b: Language interface to the JIT](https://github.com/rubinius/compiler-ng/milestone/4)
+  * [4: Language updates](https://github.com/rubinius/compiler-ng/milestone/5)
+  * [10: Tier-N JIT](https://github.com/rubinius/compiler-ng/milestone/6)
+
+* **[rubinius/rubinius](https://github.com/rubinius/rubinius)**
+  * [2: Rubinius build system & GitHub Actions](https://github.com/rubinius/rubinius/milestone/6)
+  * [5: Rubygems+Bundler running](https://github.com/rubinius/rubinius/milestone/7)
+  * [6: Ruby core library passing specs](https://github.com/rubinius/rubinius/milestone/8)
+  * [7: Ruby standard library passing specs](https://github.com/rubinius/rubinius/milestone/9)
+  * [8: Metasploit passing specs](https://github.com/rubinius/rubinius/milestone/10)
+  * [9: Rails and Hanami passing specs](https://github.com/rubinius/rubinius/milestone/11)
+
+## Summary (Or, Let's Get Started!)
+
+If you've made it here, I'm guessing you're either ready to pick a fight or
+something about all this has your attention. Either way, I appreciate you
+sticking it out.
+
+Those of us who have been using Ruby for a long time have a lot to be grateful
+for, and those who may be just getting to know Ruby have a lot of joyful
+experiences awaiting them.
+
+The world has changed a ton since Evan first shared Rubinius with us, but what
+hasn't changed is that problems are hard to solve and there are a lot of them.
+
+Ruby is a pretty good tool for solving problems, and just like the early days
+when those of us started working on Rubinius, we'd like to help Ruby be an even
+better tool for solving them.
+
+If you want to help out, [here's the code](https://github.com/rubinius/rubinius).
