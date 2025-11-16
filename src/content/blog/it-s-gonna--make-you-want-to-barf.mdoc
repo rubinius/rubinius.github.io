@@ -1,0 +1,62 @@
+---
+title: "It's Gonna Make You Want to Barf"
+author: Brian Shirai
+date: 2025-11-15
+---
+
+Ah, naming things...
+
+You get hit by a burst of enthusiasm. Sit down at your computer. Rub your hands
+together. Smile in anticipation. Rest those fingertips on the keyboard, wrists
+at just the right angle to avoid early-onset RSI injury.
+
+And... Nothing. Well, nothing *good* anyway, come out.
+
+
+burp (brixen's universal rubinius parser) or barf (brixen's alternative ruby framework)
+
+Of course, many names try to follow some sort of theme or convention. Like Ruby
+is a rock so Crystal is, too. In that vein, I thought maybe "yarn" (yet another
+rock name), but the rude JavaScript "we're the only game in town" folks stepped
+on that one.
+
+Lou's Farmed Fish House, and Aunt Kelly's Creamer 'n Corn
+
+"Why would anyone do anything so *stupid*?" you may be tempted to wonder. I'm
+not saying I didn't either. In fact, one bit of wisdom Evan Phoenix imported
+early on in Rubinius was that attempting to write a Ruby parser would derail
+the project before it ever got a chance to start.
+
+Evan had created `sydparse`, short for Sidney parser, that was an extraction of
+the CRuby parser. I took that as inspiration and created Melbourne, an "an
+object-oriented" version that could stand alone, but it still used the core
+Ruby parser underneath with a custom tree-walker and emitted proper Ruby
+objects as an AST (abstract syntax tree).
+
+And then I maintained that for years with every "little" Ruby change from 1.8.7
+to 1.9.foo to 2.bar and new the joys of Ruby 3.quux are upon us, *BUT* we've
+got [Prism](). Yay! No really, thanks folks!
+
+But the same problem remains unless you only ever want to use vanilla Ruby.
+
+There are a couple sound reasons you may not want to...
+
+Ruby will eventually get types. And those should be in the syntax, not "rbs"
+files because those are just begging to be called Ruby Bull Shit files.
+
+And [Shane Becker]() suggested something pretty solid a couple weeks back.
+"What if," he said, "someone forked Ruby?" Ok, I perked up. "Not a *hard* fork,
+*per se*, more of off a take on modern Ruby where some of the baggage was
+dropped?"
+
+Now this makes a lot of sense. There are certainly parts of Ruby where you're
+like, "How the hell did that get in here?" like you're cleaning out your garage
+and find a hard-as-rock half-eaten slide of pepperoni pizza in a pizza box
+under a box of old trophies from city bowling league.
+
+For example, I could suggest anything begged, borrowed, or stolen from Perl,
+for a start.
+
+Anyway, could be a good idea. Maybe it's all hilly billy silly.
+
+The nice thing about names: you can always change them.
