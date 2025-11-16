@@ -1,0 +1,139 @@
+---
+title: "It's Gonna Make You Want to Barf"
+author: Brian Shirai
+date: 2025-11-16T10:01:00Z
+---
+
+Ah, naming things...
+
+You get hit by a burst of enthusiasm. Sit down at your computer. Rub your hands
+together. Smile in anticipation. Rest those fingertips on the keyboard, wrists
+at just the right angle to avoid early-onset RSI...
+
+And... Nothing. Well, nothing *good* anyway, comes out.
+
+A long time ago, I worked on an application that was a truly lovely blend of
+CLI and GUI. Anything a menu item or button did could be typed into the command
+line field because all the menus and buttons did was invoke command lines
+transparently.
+
+It had another brilliant feature: the help system (sometimes called man pages
+or manual pages) was also built in, and unsurprisingly, had a command line
+invocation.
+
+Now this is where it got really fun. When using a command line interface, there
+are times when you think, "What exactly are those arguments again?". This
+application understood humans and so had *two* invocations of the help command:
+
+* **burp:** this would give a very tight synopsis of usage for a command;
+* **barf:** this would dump out the whole man page for a command.
+
+When pondering what to name the new Rubinius PEG parser, for some reason
+completely mysterious to me, I thought about this application.
+
+Ok, sure, why not...
+
+* **burp:** (brixen's universal rubinius parser); or
+* **barf:** (brixen's alternative ruby framework).
+
+Of course, many names try to follow some sort of theme or convention. Like Ruby
+is a rock, so Crystal is, too. In that vein, I thought maybe "yarn" (yet
+another rock name), but the rude JavaScript "we're the only game in town" folks
+stepped on that one. Kidding! Just kidding, JavaScript is lovely, I use
+TypeScript every chance I get.
+
+But, also, I think there was something neat about personalizing names. The days
+of *Lou's Farmed Fish House*, and *Aunt Kelly's Creamer 'n Corn* seem so much
+more wholesome and real than Facebook and OpenAI.
+
+Anyway, so lots of options for naming things, none of them phenomenal, but did
+I mention the new Rubinius PEG parser? Let's talk about that for a second.
+
+## A PEG Parser
+
+"Why would anyone do anything so *stupid*?" you may be tempted to wonder. I'm
+not saying I didn't wonder either. In fact, one bit of wisdom [Evan
+Phoenix](https://github.com/evanphx) imparted early on in Rubinius was that
+attempting to write a Ruby parser would derail the project before it ever got a
+chance to start.
+
+Evan had created `sydparse`, short for Sidney parser, that was an extraction of
+the CRuby parser and was quite functional with s-expressions and all. I took
+that as inspiration and created Melbourne, an "an object-oriented" version that
+could stand alone, but it still used the core CRuby parser underneath with a
+custom tree-walker and emitted proper Ruby objects as an AST (abstract syntax
+tree).
+
+And then I maintained that for years with every "little" Ruby change from 1.8.7
+to 1.9.foo to 2.bar and now the joys of Ruby 3.quux are upon us, *BUT* we've
+got [Prism](https://github.com/ruby/prism). Yay! No really, thanks folks!
+
+But the same problem remains unless you only ever want to use vanilla Ruby.
+
+There are a couple sound reasons you may not want to...
+
+Ruby will eventually get types. And those should be in the syntax, not "rbs"
+files because those are just... oh never mind. You want to experiment with type
+syntax? Well, you'll need to fork Ruby.
+
+And [Shane Becker](https://github.com/veganstraightedge) suggested something
+pretty solid a couple weeks back.  "What if," he said, "someone forked Ruby?"
+Ok, I perked up. "Not a *hard* fork, *per se*, more of a take on modern
+Ruby, where some of the baggage was dropped?"
+
+Now this makes a lot of sense. There are certainly parts of Ruby where you're
+wondering, "How the hell did that get in here?" like you're cleaning out your
+garage and find a hard-as-rock half-eaten slice of pepperoni pizza in a pizza
+box under a box of old trophies from city bowling league.
+
+For example, I could suggest starting with anything begged, borrowed, or stolen
+from Perl.
+
+## Language Infrastructure
+
+As fun as all that sounds to some of us, there's a much bigger reason for
+creating a PEG parser for Rubinius, and that has to do with a couple things
+about languages and parsers.
+
+I learned about PEGs from Roberto Ierusalimschy when he created LPeg for Lua,
+and [this
+paper](https://www.cs.tufts.edu/~nr/cs257/archive/roberto-ierusalimschy/lpeg-spe.pdf)
+is probably still one of the best introductions. There are [a
+couple](https://www.tug.org/tug2019/preprints/menke-lpeg.pdf) [newer
+papers](https://arxiv.org/pdf/2507.01272), too.
+
+At the time, I first thought about implementing the ideas as [a Ruby
+library](https://github.com/brixen/pegarus). And later, I began adding the
+instructions directly [to the Rubinius
+ISA](https://github.com/rubinius/rubinius/commit/956071ab5e310528d88506f8e428cad876d9099a).
+
+One of the fantastic aspects of PEGs, truly not to be under-estimated, is that
+they are composable. Yes, that's right. You could write a little number parser,
+and I could write a little string parser, and your parser and my parser could
+get along just swimmingly as a number, string parser.
+
+This is a powerful idea. Most language tech has enormously difficult boundaries
+around it. You buy into a language ecosystem and then you're at the mercy of
+every single bad decision in that ecosystem, from the way the core library
+versus standard library is split, to the way the build system and package
+manager work. Not exactly with all languages, but pretty damn close.
+
+Now, for creating a language ecosystem to implement [the language
+facilities](https://vivarium-ai.com/blog/2025-11-08-part-2-the-languages/) in
+[Vivarium AI](https://vivarium-ai.com), the ability to compose language
+elements will give us enormous leverage and efficiency. To my knowledge, there
+is no other system today that is building something as composable and powerful.
+Unless you already use some version of Lisp or Forth. They've both had this
+since damn near the beginning.
+
+If you know of something, shoot me a note, I'd love to take a look at it.
+
+So that's the bigger picture. Rubinius is getting a new PEG parser named
+[burp](https://github.com/rubinius/burp). If that makes you want to barf, you
+could name your fork that.
+
+## Summary
+
+Anyway, could be a good idea. Maybe it's all hilly billy silly.
+
+The nice thing about names: you can always change them.
