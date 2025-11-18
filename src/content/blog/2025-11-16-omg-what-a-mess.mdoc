@@ -4,23 +4,20 @@ author: Brian Shirai
 date: 2025-11-16T12:01:00Z
 ---
 
-## D. R. A. F. T.
-
 *"Like fences make good neighbors, boundaries make good systems."*&mdash;Probably
 Someone Famous
 
-If someone famous didn't say that, they probably should have, but I'll take
-credit so it's not just some anonymous thing floating out there like an orphan.
+If someone famous didn't say that, they probably should have.
 
 But regardless of which precise words an LLM might use to construct such a
 sentence from the ruminations of billions of people, the idea is pretty simple,
 and profound.
 
-I'd go so far as to say that without it, no life would exist.  Because, in
-fact, this is precisely how life works. I learned that this probably has to do
-with how the ratio of surface area to volume of a cell changes as the dimenions
-of the cell grows and the need to transport energy materials and waste across
-that cell boundary.
+I'd go so far as to say that without it, no life would exist. Because, in fact,
+this is precisely how life works. I learned that this probably has to do with
+how the ratio of surface area to volume of a cell changes as the dimensions of
+the cell grows and the need to transport energy materials and waste across that
+cell boundary.
 
 In the artificial (i.e. not living) things humans muster, there is not this
 obvious constraint, and so things like
@@ -31,4 +28,128 @@ this guy who told me, "I believe in monorepos' like they're some kind of
 middle-tier deity) long after they should be historical footnotes in obscure
 compsci trivia.
 
+Alas, we soldier on...
 
+## Building Complex Systems
+
+Building complex software systems is hard, no question about that. How we
+choose to approach it offers quite a bit of latitude.
+
+There are four audiences for a software component:
+
+1. Core developers
+1. Contributors
+1. System maintainers / packagers
+1. End users
+
+**Core developers** need sharp tools and use them often. They want quick
+development cycles, and they want to be able to merge contributions with
+confidence.
+
+**Contributors** need an extremely smooth getting started experience and ease in
+adding their contributions.
+
+Almost every flavor of Unix/Linux has its unique way of building and
+maintaining software packages for that system. System **package maintainers**
+want the least friction possible when packaging for their system. Usually, this
+means using as standard as possible build systems and parameterizing things so
+they can be customized to the system's approach without maintaining brittle
+patchsets.
+
+**End users** want to install a package on their favorite system and get value from
+using a piece of software with as little effort as possible.
+
+Among these four audiences, if anyone is going to suffer, it has to be the core
+developers. If the package managers have to deal with a lot of frustration,
+they will either hate you or just not support your package.
+
+If contributors have to deal with a lot of confusing steps or cumbersome
+dependencies, they just won't waste their time.
+
+If you don't have contributors and package maintainers, you will have very few
+users.
+
+## Building Rubinius Before
+
+Rubinius is not an easy project to build. It was entering an existing
+ecosystem, and some of the difficulty derived from that ecosystem.
+
+For example, Ruby has an extremely complex encoding system that required a
+custom encoding engine that wasn't easily available as a system package or
+robust separate library. So, we had to maintain that.
+
+These were all the "external" libraries that Rubinius vendored and maintained
+to make it as easy as possible for people to build the project:
+
+* double-conversion
+* libffi
+* libsodium
+* libtommath
+* oniguruma
+* rapidjson
+* winpthreads
+* zlib
+
+Since Rubinius started as an implementation of Ruby, and since Rake is a
+beloved tool used in the Ruby ecosystem, it made sense to implement the build
+system in Rake. We wanted the experience to be as simple as:
+
+1. Clone [https://github.com/rubinius/rubinius](https://github.com/rubinius/rubinius)
+2. Run `rake`
+3. Enjoy!
+
+Since Rubinius started using LLVM to implement the machine code JIT
+(just-in-time) compiler around LLVMv3 when there was very little system
+package support for LLVM, we also pre-built and hosted versions of the library
+for various operating systems.
+
+These efforts were certainly not without merit, and Rubinius was pretty easy to
+work on. In fact, almost 400 people have contributed to the project.
+
+But it was not pleasant for various package maintainers. Having Ruby as a build
+requirement caused a lot of problems. Vendoring libraries like zlib got us
+yelled at by maintainers, but for good reason. If projects like Rubinius vendor
+libraries like zlib, it makes it really hard for system maintainers to know
+that they've patched all the vulnerabilities in a specific library when they
+are discovered and fixed.
+
+## A build2 Future
+
+The [build2](https://www.build2.org) project "is a hierarchy of tools
+consisting of a general-purpose build system, package manager (for package
+consumption), and project manager (for project development)."
+
+It's basically everything I wanted more than 15 years ago when I was wiring
+everything together with Rake and shell scripts, but they only started working
+on it about 10 years ago.
+
+One of the most valuable aspects of build2 is that it implements a ["multi-repo
+first"](https://www.build2.org/faq.xhtml#what) approach.
+
+The Rubinius language platform is made up of various components, some of which
+are maintained by other groups. The purpose of the new [build
+repository](https://github.com/rubinius/build) is to provide a way to build
+everything at once, while still maintaining the boundaries around the
+individual components.
+
+The approach used here tries to strike a balance as follows:
+
+* Keep boundaries as tight as possible: Don't vendor things that are separate
+  components. Don't add significant build dependencies, like Ruby.
+* Keep build steps explicit and "accessible": Build steps are combined into
+  build scripts invoked as make targets. They can be decomposed and recomposed
+  in packaging systems without burdening the package managers with writing
+  extra custom code. The more granular and standard, the more likely a system
+  package manager can be easily configured for your project's "recipe".
+* Make it easy to clone and go, there should be no step 3. For example, clone
+  the repo, type `make` or maybe `make help` and then `make`.
+
+There's still work to do, but with the new approach, it's still as easy as:
+
+1. Clone [https://github.com/rubinius/build](https://github.com/rubinius/build)
+2. Run `make`
+3. Enjoy!
+
+Meanwhile, if you want to get Rubinius from a system package, the chances it'll
+be there are much greater because the experience for package maintainers will
+be nearly as smooth and simple.
