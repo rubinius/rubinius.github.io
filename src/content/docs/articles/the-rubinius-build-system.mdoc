@@ -1,0 +1,56 @@
+---
+title: The Rubinius Build System
+---
+
+## A Little History
+
+I'm not sure there's a lesson in it, but here's a little Rubinius history to give (hopefully) context to the new build system.
+
+Rubinius started as a Ruby implementation. There were some cool ideas in it,
+like building as much in Ruby as possible, not using a gloabl interpreter lock
+so native threads could run in parallel, using a JIT compiler to make things
+faster, using a precise, generational garbage collector to also help make
+things faster.
+
+But it was still top-to-bottom "just" a Ruby implementation.
+
+So we built it as one big monolithic thing. And since Rake was a beloved Ruby
+tool, we used Rake.
+
+And it worked well. The whole thing. Using Rake, building it as one big
+monolith. We didn't wax poetic about "majestic monoliths" or anything like
+that, we just wanted it to be easy to build.
+
+Even back then, though, Rubinius started to be more than just a Ruby
+implementation. A couple folks created fun languages that target Rubinius
+([Atomy](https://github.com/vito/atomy) and
+[Fancy](https://github.com/bakkdoor/fancy) are notable).
+
+In the past ten-ish years, a lot has happened in programming languages and
+software. For one, there's a major new build system for C/C++:
+[build2](https://www.build2.org)
+
+The new Rubinius build sytem is based on build2 and just about three things:
+
+1. Boundaries make good systems;
+2. Do the same thing everywhere (ie no difference between a dev machine, CI,
+   and a package builder); and
+3. Use tools in the simplest way possible (but no simpler).
+
+What we get out of these three is principled composability, so when some
+system just must do it its own way, it can remix easily and safely.
+
+The rest of this article explains in detail how the Rubinius build system
+works.
+
+## Setting Boundaries
+
+Some reasons to put a component in its own repository:
+
+* It's in a different programming language;
+* It's not our code;
+* It's only used on some systems;
+* It's one of several viable options;
+* It has particular testing or security concerns;
+
+**( This document is a draft work-in-progress. )**
