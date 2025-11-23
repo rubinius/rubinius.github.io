@@ -1,0 +1,90 @@
+---
+title: "SenVer: The Future of Versioning"
+author: Brian Shirai
+date: 2025-11-22T18:00:00Z
+---
+
+In the news recently, Ruby is hopping from version 3.5 to [version
+4.0](https://www.ruby-lang.org/en/news/2025/11/17/ruby-4-0-0-preview2-released/).
+Exciting! 🎉
+
+There was some mailing list discussion about the jump, but it comes down to
+Matz gets to choose the version, which seems reasonable to me.
+
+This is also topical because I've been hammering on [the new build
+system](/docs/articles/the-rubinius-build-system/) for Rubinius and of course
+will need a version for all that real soon now.
+
+Having lived through the religious wars around SemVer (that's [_**Semantic**_
+Versioning](https://semver.org)), I've given some thought to version schemes
+over the decades. Some of what follows is [a restatement of previous
+material](https://github.com/rubinius/rubinius-book/blob/9ef10ddee92ad244f96f2a237d99944665c9884e/manuscript/versioning.md).
+
+I still think this captures the essence:
+
+> Versioning schemes are the source of endless debates and plenty of disappointment and unhappiness all around. That’s unfortunate because a versioning scheme is about getting new stuff. Who doesn’t want new stuff?
+>
+> A versioning scheme is part communication and part contract. The communication part is a signal from developers that an update is available. The contract part is an agreement about the impact of the update.
+>
+> The versioning scheme exists in the context of two competing concerns: 1. the developer wants to deliver features and improvements; and 2. the user wants the highest stability for the least amount of effort on their part.
+
+So far, so good. Like I said, who doesn't want new stuff?
+
+Well, then, why is versioning such a mess?
+
+> The conflict between these two competing concerns is complicated. Every user’s needs are unique (even allowing for some groups of similar users). Trying to devise a scheme that meets all of those needs at once is impossible. Especially as the scope of the software covered by a single version number increases. Consequently, there’s a tension between batching things up in big enough chunks to accommodate the users who update slowly and providing new features quickly to those that update often.
+>
+> To complicate this even further, the software development industry still suffers from the legacy of putting bits on physical media, putting those into boxes, into trucks, and onto store shelves. We are slowly moving away from this legacy model and to one where a mostly invisible stream of improvements find their way automatically to our devices and applications. This "evergreen" model of software updates is most visible (or invisible) in web browsers, but is also becoming common on our smart phones, too.
+
+Also still true. Tensions and complications abound, but we make it worse than
+it needs to be. No really, I'm not kidding. We take something that is
+inherently a bit hard and make it much worse by insisting on things that are
+either anachronistic ("boxed" software) or attempt to artificially hide the
+messy bits and end up with messes piled as high as the treetops (any LTS, I
+don't care if it's Haskell's Stack or Ubuntu or npm or what-have-you).
+
+And don't even get me started on security implications. I had an IT manager
+tell me that a 10-year old RHEL is "more secure" because they've "patched the
+bugs". Oh, my...
+
+## Sensible Versioning
+
+Apple made a tweak to their versioning scheme this year, too. When I saw it, I
+immediately thought, "Why didn't I think of that?"
+
+If you haven't heard about it, this is all there is to it: The version of
+something is next year followed by a dot (.) and then a number.
+
+So, right now, my iPhone is running iOS 26.1, my MacBook is running macOS
+(Tahoe) 26.1, my iPad is running iPadOS 26.1, and... well, you get the picture.
+It was a bit too far for Apple to let go of the macOS special edition name, so
+Tahoe is still in the version specifier.
+
+Inspired, right?
+
+I think so.
+
+Now for Rubinius. With a small tweak to the previous [EPOCH.SEQ
+scheme](https://github.com/rubinius/rubinius-book/blob/9ef10ddee92ad244f96f2a237d99944665c9884e/manuscript/versioning.md#rubinius-versioning),
+which was already pretty simple, we get something even more clear.
+
+One little detail remains. I can see, from Apple's perspective, why they
+wouldn't want you to be running a version of something _from last year_, and
+since they typically have their big device refreshes (at least the consumer
+favorites, like iPhone) in the fall, naming it for _next_ year makes a lot of
+sense.
+
+But when does next year actually start? Again, we've got some precedents. Some
+companies have "fiscal years" that are different than calendar years. No
+biggie, it all works.
+
+Since June 1st doesn't get enough attention, despite literally kicking off the
+month that contains [Bloomsday](https://en.wikipedia.org/wiki/Bloomsday), I
+figured why not start the _"version year"_ on June 1st.
+
+There you have it. The current (soon to be) version of Rubinius is 26.0. And
+next June 1st, it'll be 27.0, and so on.
+
+Update early and often. The hackers will hate you.
+
+SenVer: Sensible Versioning. Enough said.
