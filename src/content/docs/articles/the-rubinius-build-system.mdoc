@@ -7,7 +7,7 @@ title: The Build System
 I'm not sure there's a lesson in it, but here's a little Rubinius history to give (hopefully) context to the new build system.
 
 Rubinius started as a Ruby implementation. There were some cool ideas in it,
-like building as much in Ruby as possible, not using a gloabl interpreter lock
+like building as much in Ruby as possible, not using a global interpreter lock
 so native threads could run in parallel, using a JIT compiler to make things
 faster, using a precise, generational garbage collector to also help make
 things faster.
@@ -32,10 +32,10 @@ In the past ten-ish years, a lot has happened in programming languages and
 software. For one, there's a major new build system for C/C++:
 [build2](https://www.build2.org)
 
-The new Rubinius build sytem is based on build2 and just about three things:
+The new Rubinius build system is based on build2 and just about three things:
 
 1. Boundaries make good systems;
-2. Do the same thing everywhere (ie no difference between a dev machine, CI,
+2. Do the same thing everywhere (i.e. no difference between a dev machine, CI,
    and a package builder); and
 3. Use tools in the simplest way possible (but no simpler).
 
@@ -66,7 +66,7 @@ Scale:
 1. Large mountain on earth: A library like oniguruma;
 1. Big hill: A library like libasio;
 1. A large rock: Python PEG parser;
-1. A smaller rock: CLI11 command line libray.
+1. A smaller rock: CLI11 command line library.
 
 Based on this, we can say that anything the size of a large mountain and
 smaller should be in its own separately-buildable package, and anything larger
@@ -141,7 +141,7 @@ help: ## Display this help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[.a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 ```
 
-You may notice something a bit different in tis Makefile: the `help` target.
+You may notice something a bit different in this Makefile: the `help` target.
 This is a neat way to add easy guidance to newcomers and is often helpful even
 for experienced contributors.
 
