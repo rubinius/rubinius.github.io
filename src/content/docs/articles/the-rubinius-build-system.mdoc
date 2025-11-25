@@ -26,6 +26,8 @@ implementation. A couple folks created fun languages that target Rubinius
 ([Atomy](https://github.com/vito/atomy) and
 [Fancy](https://github.com/bakkdoor/fancy) are notable).
 
+## build2
+
 In the past ten-ish years, a lot has happened in programming languages and
 software. For one, there's a major new build system for C/C++:
 [build2](https://www.build2.org)
@@ -43,6 +45,17 @@ system just must do it its own way, it can remix easily and safely.
 The rest of this article explains in detail how the Rubinius build system
 works.
 
+## Scale & Complexity
+
+"One of these is not like the others" is the source of a lot of pain and
+suffering in many software systems because even small differences can add
+complexity. Where that difference is managed helps deal with that complexity.
+
+Another challenge in systems is their scale. Since software is often
+intangible, it can be hard to get a sense of the scale of it, other than
+looking at all the source files, but even that can't directly show the
+functional complexity of a piece of software.
+
 Scale:
 
 1. Large galaxy: Linux;
@@ -50,20 +63,32 @@ Scale:
 1. Solar system: Rubinius;
 1. Jupiter-sized planet: rbx compiler;
 1. Earth-sized planet: Ruby core library;
-1. Large mountain on earth: A library like OpenFHE;
+1. Large mountain on earth: A library like oniguruma;
 1. Big hill: A library like libasio;
 1. A large rock: Python PEG parser;
 1. A smaller rock: CLI11 command line libray.
 
-Anything the size of a rock should be a separately-buildable package, and anything larger than a rock should only be a composition of such packages.
+Based on this, we can say that anything the size of a large mountain and
+smaller should be in its own separately-buildable package, and anything larger
+than a rock should only be a composition of such packages.
 
-Every biological system is a collection of well-bounded components, most of them microscopic. Only humans, in their infinite "wisdom" conjure something like Bazel.
+Every biological system is a collection of well-bounded components, most of
+them microscopic. Only humans, in their infinite "wisdom" conjure something
+like Bazel.
 
-Why would anyone want to install Java to build a C/C++ library?
+Putting planets, solar systems, and galaxies into one package (or one
+monolithic build system), is just begging for a lot of unnecessary complexity
+because the number of "one of these is not like the others" grows and tends to
+get mixed-in places that make changes harder and harder.
+
+One reason for this is because without unbreakable boundaries (e.g. that code
+requires a separate `git clone`) "DRY" up the build script or "parameterize" a
+subroutine is often irresistible.
 
 ## Setting Boundaries
 
-Some reasons to put a component in its own repository:
+Scale is one consideration for when to impose some boundaries. Some other
+reasons to put a component in its own repository:
 
 * It's in a different programming language;
 * It's not our code;
@@ -71,10 +96,57 @@ Some reasons to put a component in its own repository:
 * It's one of several viable options;
 * It has particular testing or security concerns;
 
-**( This document is a draft work-in-progress. )**
+## Minimum Build Requirements
+
+The intended requirements for building a Rubinius component are:
+
+1. make
+2. clang/clang++
+3. build2
+
+### Makefile
+
+```make
+PROJ = rbx
+
+# Allow override (e.g., `make VERSION=1.2.3`)
+VERSION ?= $(shell (git describe --tags 2>/dev/null || echo "develop") | sed 's/^v//')
+REVISION ?= $(shell git rev-parse --short HEAD)
+
+.PHONY: help setup config build install release test clean all
+
+all: setup config build test
+
+##@ Dependencies
+setup: ## Clone all components
+	@git submodule update --init --recursive
+	@./.build2/scripts/setup-build2.sh $(PROJ)
+
+config: ## Configure
+	@./.build2/scripts/config-build2.sh $(PROJ)
+
+##@ Development
+build: ## Build all components
+	@./.build2/scripts/build-build2.sh $(PROJ)
+
+##@ Testing
+test: ## Run the tests
+	@./.build2/scripts/test-build2.sh $(PROJ)
+
+##@ Maintenance
+clean: ## Remove all build artifacts
+	@./.build2/scripts/clean-build2.sh $(PROJ)
+
+help: ## Display this help
+	@awk 'BEGIN {FS = ":.*##"; printf "Usage:\n  make \033[36m<target>\033[0m\n"} /^[.a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+```
+
+You may notice something a bit different in tis Makefile: the `help` target.
+This is a neat way to add easy guidance to newcomers and is often helpful even
+for experienced contributors.
 
 ```
-make help
+$ make help
 Usage:
   make <target>
 
@@ -92,3 +164,31 @@ Maintenance
   clean            Remove all build artifacts
   help             Display this help
 ```
+
+### The Build Steps
+
+The steps to build a component are standardized as much as possible across all
+components.
+
+#### setup
+
+The `setup` target ensures that all source code and input files are present. If
+some of the files need to be generated, this step of the build process should
+handle that.
+
+#### config
+
+The `config` target prepares the source code for the build process.
+
+#### build
+
+The `build` target builds the _default artifact_. For a library, this would be
+the library itself. For an application, this would be the executable. For
+something like Ruby code, it may be the source files itself, or for a system
+like Rubinius, it could be bytecode files or even an executable.
+
+#### test
+
+The `test` target checks the integrity of the default artifact. For a library,
+this may be a sample application that exercises the library's API. For an
+executable, this may be automated tests that mimic a user's interaction.
