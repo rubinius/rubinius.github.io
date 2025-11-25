@@ -1,0 +1,58 @@
+---
+import { getCollection } from "astro:content";
+
+const articles = await getCollection("articles");
+const tutorials = await getCollection("tutorials");
+const howtos = await getCollection("howtos");
+const reference = await getCollection("reference");
+---
+
+    <aside class="hidden sm:block">
+    <h1 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide">
+      Documentation
+    </h1>
+
+    <section>
+      <h2 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide">
+        Articles
+      </h2>
+      <ul class="mb-2 px-2 text-xs tracking-wide">
+        {articles.map((d) => (
+        <li><a href={`/docs/articles/${d.id}/`}>{d.data.title}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide">
+        Tutorials
+      </h2>
+      <ul>
+        {tutorials.map((d) => (
+          <li><a href={`/docs/${d.slug}/`}>{d.data.title}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide">
+        How-to guides
+      </h2>
+      <ul>
+        {howtos.map((d) => (
+          <li><a href={`/docs/${d.slug}/`}>{d.data.title}</a></li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="mb-2 px-2 text-xs font-semibold uppercase tracking-wide opacity-70">
+        Reference
+      </h2>
+      <ul>
+        {reference.map((d) => (
+          <li><a href={`/docs/${d.slug}/`}>{d.data.title}</a></li>
+        ))}
+      </ul>
+    </section>
+    </aside>

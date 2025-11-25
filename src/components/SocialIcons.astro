@@ -1,18 +1,24 @@
 ---
-import { siBluesky, siGithub, siDiscord, siYoutube } from "simple-icons";
+import { siBluesky, siGithub, siDiscord, siRss, siYoutube } from "simple-icons";
 
 const icons = [
   { icon: siBluesky, url: "https://bsky.app/profile/rubinius.com" },
   { icon: siDiscord, url: "https://discord.gg/25GuZR4fBN" },
   // { icon: siYoutube, url: "" },
   { icon: siGithub, url: "https://github.com/rubinius/" },
+  { icon: siRss, url: "/rss.xml" },
 ];
 ---
 
 <div class="flex gap-2 items-end">
   {icons.map(({ icon, color, dark, url }) => (
-  <a class="text-fg/60 rounded-sm hover:text-fg/100 hover:ring-1 hover:p-1 hover:ring-accent/60" href={url}>
-    <svg fill="currentColor" viewBox="0 0 24 24" aria-label={icon.title} width="24" height="24">
+  <a class="rounded-full ring-1 p-1.5
+            bg-bg text-fg/60
+            transition-colors
+            hover:bg-fg hover:text-bg
+            hover:ring-accent/60"
+            href={url}>
+    <svg fill="currentColor" viewBox="0 0 24 24" aria-label={icon.title} width="20" height="20">
       <path d={icon.path} />
     </svg>
   </a>

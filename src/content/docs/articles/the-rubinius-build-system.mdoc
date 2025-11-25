@@ -1,5 +1,5 @@
 ---
-title: The Rubinius Build System
+title: The Build System
 ---
 
 ## A Little History
@@ -43,6 +43,24 @@ system just must do it its own way, it can remix easily and safely.
 The rest of this article explains in detail how the Rubinius build system
 works.
 
+Scale:
+
+1. Large galaxy: Linux;
+1. Small galaxy: LLVM;
+1. Solar system: Rubinius;
+1. Jupiter-sized planet: rbx compiler;
+1. Earth-sized planet: Ruby core library;
+1. Large mountain on earth: A library like OpenFHE;
+1. Big hill: A library like libasio;
+1. A large rock: Python PEG parser;
+1. A smaller rock: CLI11 command line libray.
+
+Anything the size of a rock should be a separately-buildable package, and anything larger than a rock should only be a composition of such packages.
+
+Every biological system is a collection of well-bounded components, most of them microscopic. Only humans, in their infinite "wisdom" conjure something like Bazel.
+
+Why would anyone want to install Java to build a C/C++ library?
+
 ## Setting Boundaries
 
 Some reasons to put a component in its own repository:
@@ -54,3 +72,23 @@ Some reasons to put a component in its own repository:
 * It has particular testing or security concerns;
 
 **( This document is a draft work-in-progress. )**
+
+```
+make help
+Usage:
+  make <target>
+
+Dependencies
+  setup            Clone all components
+  config           Configure
+
+Development
+  build            Build all components
+
+Testing
+  test             Run the tests
+
+Maintenance
+  clean            Remove all build artifacts
+  help             Display this help
+```

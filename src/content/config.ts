@@ -1,16 +1,14 @@
 import { defineCollection, z } from 'astro:content';
+import { glob } from "astro/loaders";
 
-const docs = defineCollection({
-  type: "content",
-  schema: z.object({
-    title: z.string(),
-    tags: z.array(z.string()).optional(),
-    order: z.number().optional(),
-  }),
+const docsSchema = z.object({
+  title: z.string(),
+  tags: z.array(z.string()).optional(),
+  order: z.number().optional(),
 });
 
 const blog = defineCollection({
-  type: "content",
+  loader: glob({ pattern: "**/*.mdoc", base: "./src/content/blog" }),
   schema: z.object({
     title: z.string(),
     subtitle: z.string().optional(),
@@ -22,7 +20,30 @@ const blog = defineCollection({
   }),
 });
 
+const articles = defineCollection({
+  loader: glob({ pattern: "**/*.mdoc", base: "./src/content/docs/articles" }),
+  schema: docsSchema,
+});
+
+const tutorials = defineCollection({
+  loader: glob({ pattern: "**/*.mdoc", base: "./src/content/docs/tutorials" }),
+  schema: docsSchema,
+});
+
+const howtos = defineCollection({
+  loader: glob({ pattern: "**/*.mdoc", base: "./src/content/docs/howtos" }),
+  schema: docsSchema,
+});
+
+const reference = defineCollection({
+  loader: glob({ pattern: "**/*.mdoc", base: "./src/content/docs/reference" }),
+  schema: docsSchema,
+});
+
 export const collections = {
-  blog: blog,
-  docs: docs,
+  blog,
+  articles,
+  tutorials,
+  howtos,
+  reference,
 };
